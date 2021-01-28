@@ -10,11 +10,26 @@
 - import_tasks: auditd.yml
   become: yes
 
-# Set network level protections
-- import_tasks: network.yml
 
 # Limit the use of local accounts
 - import_tasks: localaccounts.yml
+
+
+# Set network level protections
+- import_tasks: network.yml
+
+
+# more IP spoofing prevention
+- name: "prevent IP spoofing"
+  ansible.builtin.copy:
+    backup: yes
+    dest: /etc/host.conf
+    group: root
+    mode: 644
+    owner: root
+    src: host.conf
+  become: yes
+
 
 # Set password restrictions/standards/complexity
 - import_tasks: passwords.yml
