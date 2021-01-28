@@ -78,13 +78,53 @@ UsePAM yes
 UseDNS no
 
 
-# SFTP system
-Subsystem  sftp  /usr/lib/openssh/sftp-server
-
-
-# User/machine specific configurations
+# Specific users with access
 {% if devops_user is defined %}
-Match User {{ devops_user }}
-    PasswordAuthentication no
 AllowUsers {{ devops_user }}@{{ controller_ip }}
 {% endif %}
+{% for _user in security_ssh_users %}
+{% if _user.host is defined %}
+AllowUsers {{ _user.name }}@{{ _user.host }}
+{% else %}
+AllowUsers {{ _user.name }}
+{% endif %}
+{% endfor %}
+
+
+# Specific groups with access
+{% for _group in security_ssh_groups %}
+{% if _group.host is defined %}
+AllowGroups {{ _group.name }}@{{ _group.host }}
+{% else %}
+AllowGroups {{ _group.name }}
+{% endif %}
+{% endfor %}
+
+
+# SFTP system
+{% if security_sftp_users %}
+Subsystem  sftp  internal-sftp
+{% else %}
+Subsystem  sftp  /usr/lib/openssh/sftp-server
+{% endif %}
+
+
+{% if devops_user is defined %}
+# Prevent password authentication for DevOps user
+Match User {{ devops_user }}
+    PasswordAuthentication no
+{% endif %}
+
+
+{% if security_sftp_users %}
+# Configure SFTP users
+{% for _user in security_sftp_users %}
+Match User {{ _user.name }}
+    ChrootDirectory {{ user.chroot|default(%h/public_html) }}
+    X11Forwarding {{ user.x11forwarding|default(no) }}
+    AllowAgentForwarding {{ user.allowagentforwarding|default(no) }}
+    AllowTcpForwarding {{ user.allowtcpforwarding|default(no) }}
+    ForceCommand internal-sftp
+{% endfor %}
+{% endif %}
+
