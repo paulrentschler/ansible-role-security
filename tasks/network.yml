@@ -1,50 +1,106 @@
 ---
 # Set network level protections
 
+
 - name: "network : disable IPv6 auto configuration (default network)"
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/sysctl.conf
     line: "net.ipv6.conf.default.autoconf = 0"
     regex: '^(#?)net.ipv6.conf.default.autoconf'
   become: yes
 
 
-# Deny ICMP reqdirects to prevent man-in-the-middle (MITM) attacks
-
-- name: "network : do not accept IPv6 ICMP redirects (all networks)"
-  lineinfile:
+# Ignoring ICMP redirects help to prevent man-in-the-middle (MITM) attacks
+- name: "network : ignore ICMP redirects"
+  ansible.builtin.lineinfile:
     path: /etc/sysctl.conf
-    line: "net.ipv6.conf.all.accept_redirects = 0"
-    regex: '^(#?)net.ipv6.conf.all.accept_redirects'
-  become: yes
-
-- name: "network : do not accept IPv4 ICMP redirects (all networks)"
-  lineinfile:
-    path: /etc/sysctl.conf
-    line: "net.ipv4.conf.all.accept_redirects = 0"
-    regex: '^(#?)net.ipv4.conf.all.accept_redirects'
-  become: yes
-
-- name: "network : do not accept IPv4 ICMP redirects (default network)"
-  lineinfile:
-    path: /etc/sysctl.conf
-    line: "net.ipv4.conf.default.accept_redirects = 0"
-    regex: '^(#?)net.ipv4.conf.default.accept_redirects'
+    line: "net.{{ item }}.accept_redirects = 0"
+    regex: '^(#?)net.{{ item }}.accept_redirects'
+  loop:
+    - "ipv4.conf.all"
+    - "ipv4.conf.default"
+    - "ipv6.conf.all"
+    - "ipv6.conf.default"
   become: yes
 
 
-# Do not send ICMP redirects because we are not a router
-
-- name: "network : do not send IPv4 ICMP redirects (all networks)"
-  lineinfile:
+# Ignore ICMP redirects because we are not a router
+- name: "network : ignore ICMP redirects"
+  ansible.builtin.lineinfile:
     path: /etc/sysctl.conf
-    line: "net.ipv4.conf.all.send_redirects = 0"
-    regex: '^(#?)net.ipv4.conf.all.send_redirects'
+    line: "net.{{ item }}.send_redirects = 0"
+    regex: '^(#?)net.{{ item }}.send_redirects'
+  loop:
+    - "ipv4.conf.all"
+    - "ipv4.conf.default"
   become: yes
 
-- name: "network : do not send IPv4 ICMP redirects (default network)"
-  lineinfile:
+
+​- name: "network : ip spoofing protection"
+  ansible.builtin.lineinfile:
     path: /etc/sysctl.conf
-    line: "net.ipv4.conf.default.send_redirects = 0"
-    regex: '^(#?)net.ipv4.conf.default.send_redirects'
+    line: "net.{{ item }}.rp_filter = 1"
+    regex: '^(#?)net.{{ item }}.rp_filter'
+  loop:
+    - "ipv4.conf.all"
+    - "ipv4.conf.default"
   become: yes
+
+​
+​- name: "network : ignore ICMP broadcast requests"
+  ansible.builtin.lineinfile:
+    path: /etc/sysctl.conf
+    line: "net.ipv4.icmp_echo_ignore_broadcasts = 1"
+    regex: '^(#?)net.ipv4.icmp_echo_ignore_broadcasts'
+  become: yes
+​
+
+​- name: "network : disable source packet routing"
+  ansible.builtin.lineinfile:
+    path: /etc/sysctl.conf
+    line: "net.{{ item }}.accept_source_route = 0"
+    regex: '^(#?)net.{{ item }}.accept_source_route'
+  loop:
+    - "ipv4.conf.all"
+    - "ipv4.conf.default"
+    - "ipv6.conf.all"
+    - "ipv6.conf.default"
+  become: yes
+
+​
+​- name: "network : block SYN attacks"
+  ansible.builtin.lineinfile:
+    path: /etc/sysctl.conf
+    line: "net.ipv4.{{ item.name }} = {{ item.value }}"
+    regex: '^(#?)net.ipv4.{{ item.name }}'
+  loop:
+    - name: tcp_syncookies
+      value: 1
+    - name: tcp_max_syn_backlog
+      value: 2048
+    - name: tcp_synack_retries
+      value: 2
+    - name: tcp_syn_retries
+      value: 5
+  become: yes
+
+​
+# A Martian packet (packet from Mars) is an IP packet which specifies
+# a source or destination address that is reserved for special-use
+# by Internet Assigned Numbers Authority (IANA).
+#
+# Examples:
+#   10.0.0.0/8
+#   192.168.0.0/16
+​- name: "network : log martians"
+  ansible.builtin.lineinfile:
+    path: /etc/sysctl.conf
+    line: "net.ipv4.{{ item }} = 1"
+    regex: '^(#?)net.ipv4.{{ item }}'
+  loop:
+    - "conf.all.log_martians"
+    - "conf.default.log_martians"
+​    - "icmp_ignore_bogus_error_responses"
+​  become: yes
+​
+​
