@@ -34,6 +34,24 @@
 # Set password restrictions/standards/complexity
 - import_tasks: passwords.yml
 
+
+# Protect shared memory by mounting it read-only
+# credit: https://help.ubuntu.com/community/StricterDefaults
+- name: protect shared memory
+  block:
+    - name: configure shared memory to be mounted read-only
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        line: "none    /run/shm    tmpfs    defaults,ro    0    0"
+        regex: '^*./run/shm*.'
+      register: _fstab_updated
+    - name: remount shared memory
+      ansible.builtin.command:
+        cmd: mount -o remount /run/shm
+      when: _fstab_updated.changed
+  become: yes
+
+
 # Limit administrative account to elevate privileges
 - name: limit sudo to only administrative accounts
   template:
