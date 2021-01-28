@@ -1,0 +1,33 @@
+---
+# Install and configure auditd to provide additional logging
+
+- name: "auditd : ensure auditd package is installed"
+  package:
+    name: "auditd"
+    state: present
+    update_cache: yes
+
+- name: "auditd : configure auditd"
+  template:
+    src: "audit.rules.j2"
+    dest: "/etc/audit/audit.rules"
+    mode: '0640'
+    backup: yes
+  notify:
+    - restart auditd
+
+- name: "auditd : configure audit remote sending"
+  template:
+    src: "audisp-remote.conf.j2"
+    dest: "/etc/audisp/audisp-remote.conf"
+    mode: '0640'
+    backup: yes
+  when: security_audit_remote_sending|bool
+  notify:
+    - restart auditd
+
+- name: "auditd : ensure auditd is started"
+  service:
+    name: "auditd"
+    state: started
+    enabled: yes

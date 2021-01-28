@@ -1,0 +1,159 @@
+---
+# Limit what local accounts can do
+
+##
+## There can be only one (root user with UID: 0)!
+##
+
+- name: "localaccounts : ensure no other users besides root have UID: 0"
+  block:
+    - name: "localaccounts : parse /etc/passwd"
+      command: cat /etc/passwd
+      changed_when: no
+      register: __security_passwd_file_audit
+
+    - name: "localaccounts : check for non-root UID: 0"
+      debug:
+        msg: "{{ item.split(':')[0] }}"
+      with_items: "{{ __security_passwd_file_audit.stdout_lines }}"
+      failed_when: item.split(':')[0] != 'root' and item.split(':')[2]|int == 0
+      when: item.split(':')[2]|int == 0
+      loop_control:
+        label: "{{ item.split(':')[0] }}: {{ item.split(':')[2] }}"
+
+    - name: "localaccounts : clear passwd variable"
+      set_fact:
+        __security_passwd_file_audit: ""
+
+
+##
+## Validate SSH config
+##
+
+- name: "localaccounts : configure sshd"
+  template:
+    src: sshd_config.j2
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: 0644
+    validate: /usr/sbin/sshd -t -f %s
+    backup: yes
+  become: yes
+  notify: restart sshd
+
+- name: "localaccounts : find any .shosts files"
+  find:
+    paths: /
+    hidden: yes
+    patterns: ".shosts"
+    recurse: yes
+  register: __security_shosts_files
+  become: yes
+
+- name: "localaccounts : remove .shosts files"
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ __security_shosts_files.files|flatten(levels=1) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: __security_shosts_files.matched|int > 0
+  become: yes
+
+- name: "localaccounts : find any shosts.equiv files"
+  find:
+    paths: /
+    hidden: yes
+    patterns: "shosts.equiv"
+    recurse: yes
+  register: __security_shosts_equiv_files
+  become: yes
+
+- name: "localaccounts : Remove shosts.equiv files"
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ __security_shosts_equiv_files.files|flatten(levels=1) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: __security_shosts_equiv_files.matched | int > 0
+  become: yes
+
+
+##
+## Validate SSH key permissions
+##
+
+- name: "localaccounts : find SSH private keys"
+  find:
+    paths: /etc/ssh/
+    patterns: "*key"
+  register: __security_ssh_private_keys
+  become: yes
+
+- name: "localaccounts : set the private SSH key permissions"
+  file:
+    path: "{{ item.path }}"
+    mode: 0600
+  loop: "{{ __security_ssh_private_keys.files|flatten(levels=1) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: __security_ssh_private_keys.matched|int > 0
+  become: yes
+
+- name: "localaccounts : find SSH public keys"
+  find:
+    paths: /etc/ssh/
+    patterns: "*.pub"
+  register: __security_ssh_public_keys
+  become: yes
+
+- name: "localaccounts : set the public SSH key permissions"
+  file:
+    path: "{{ item.path }}"
+    mode: 0644
+  loop: "{{ __security_ssh_public_keys.files|flatten(levels=1) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: __security_ssh_public_keys.matched | int > 0
+  become: yes
+
+
+##
+## Set the maximum number of concurrent logins an individual user can have
+##
+
+- name: "localaccounts : set login limits"
+  template:
+    src: maxlogins.j2
+    dest: /etc/security/limits.d/999-maxlogins.conf
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+
+
+##
+## Set login timeouts
+##
+
+- name: "loginaccounts : define login timeout variable"
+  lineinfile:
+    path: /etc/profile
+    line: "TMOUT={{ security_login_timeout }}"
+  become: yes
+
+- name: "loginaccounts : make login timeout variable read-only"
+  lineinfile:
+    path: /etc/profile
+    line: "readonly TMOUT"
+    insertafter: "TMOUT={{ security_login_timeout }}"
+  become: yes
+
+- name: "loginaccounts : export the login timeout variable"
+  lineinfile:
+    path: /etc/profile
+    line: "export TMOUT"
+    insertafter: "readonly TMOUT"
+  become: yes

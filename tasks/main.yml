@@ -1,2 +1,193 @@
 ---
-# tasks file for security
+# tasks to bolster the security of Ubuntu Linux
+
+- name: set the controller ip address
+  ansible.builtin.set_fact:
+    controller_ip: "{{ ansible_env['SSH_CLIENT'].split() | first }}"
+
+
+# Establish additional logging with auditd
+- import_tasks: auditd.yml
+  become: yes
+
+# Set network level protections
+- import_tasks: network.yml
+
+# Limit the use of local accounts
+- import_tasks: localaccounts.yml
+
+# Set password restrictions/standards/complexity
+- import_tasks: passwords.yml
+
+# Limit administrative account to elevate privileges
+- name: limit sudo to only administrative accounts
+  template:
+    src: sudoers.j2
+    dest: /etc/sudoers
+    validate: 'visudo -cf %s'
+  become: yes
+
+
+##
+## Remove insecure communication software
+##
+
+- name: "uninstall telnet-related tools"
+  package:
+    name: "{{ item }}"
+    state: absent
+  items:
+    - dcap-tunnel-telnet
+    - inetutils-telnet
+    - inetutils-telnetd
+    - libnet-telnet-cisco-perl
+    - libnet-telnet-perl
+    - libtelnet-dev
+    - libtelnet-utils
+    - libtelnet2
+    - mactelnet-client
+    - mactelnet-server
+    - telnet
+    - telnet-client
+    - telnet-server
+    - telnet-ssl
+    - telnetd
+    - telnetd-ssl
+  become: yes
+
+- name: "uninstall ftp-related tools"
+  package:
+    name: "{{ item }}"
+    state: absent
+  items:
+    - atftp
+    - atftpd
+    - bareftp
+    - cl-ftp
+    - curlftpfs
+    - ftp
+    - ftp-cloudfs
+    - ftp-proxy
+    - ftp-proxy-doc
+    - ftp-server
+    - ftp-ssl
+    - ftp-upload
+    - ftp.app
+    - ftpcopy
+    - ftpd
+    - ftpd-ssl
+    - ftpgrab
+    - ftphs-doc
+    - ftplib-dev
+    - ftplib3
+    - ftpmirror
+    - ftpwatch
+    - gadmin-proftpd
+    - gadmin-proftpd-dbg
+    - gfal2-plugin-gridftp
+    - gftp
+    - gftp-common
+    - gftp-gtk
+    - gftp-text
+    - git-ftp
+    - globus-ftp-client-dbg
+    - globus-ftp-control-dbg
+    - globus-gridftp-server-control-dbg
+    - globus-gridftp-server-dbg
+    - globus-gridftp-server-progs
+    - gosa-plugin-pureftpd
+    - gosa-plugin-pureftpd-schema
+    - inetutils-ftp
+    - inetutils-ftpd
+    - jftp
+    - jmeter-ftp
+    - kftpgrabber
+    - kio-ftps
+    - lftp
+    - libcsync-plugin-sftp
+    - libghc-ftphs-dev
+    - libghc-ftphs-dev-1.0.9.1-b7a9f
+    - libghc-ftphs-doc
+    - libghc-ftphs-prof
+    - libghc-ftphs-prof-1.0.9.1-b7a9f
+    - libglobus-ftp-client-dbg
+    - libglobus-ftp-client-dev
+    - libglobus-ftp-client-doc
+    - libglobus-ftp-client2
+    - libglobus-ftp-control-dbg
+    - libglobus-ftp-control-dev
+    - libglobus-ftp-control-doc
+    - libglobus-ftp-control1
+    - libglobus-gridftp-server-control-dbg
+    - libglobus-gridftp-server-control-dev
+    - libglobus-gridftp-server-control0
+    - libglobus-gridftp-server-dbg
+    - libglobus-gridftp-server-dev
+    - libglobus-gridftp-server6
+    - libglobus-xio-gridftp-driver-dbg
+    - libglobus-xio-gridftp-driver-dev
+    - libglobus-xio-gridftp-driver-doc
+    - libglobus-xio-gridftp-driver1
+    - libjglobus-gridftp-java
+    - libnet-tftp-perl
+    - libnet-tftpd-perl
+    - libobexftp-dev
+    - libobexftp-perl
+    - libobexftp-ruby
+    - libobexftp0
+    - libobexftp0-dev
+    - libocsync-plugin-sftp
+    - muddleftpd
+    - mysqmail-pure-ftpd-logger
+    - ncftp
+    - nordugrid-arc-gridftpd
+    - nordugrid-arc-nox-gridftp-server
+    - obexftp
+    - owftpd
+    - php-net-ftp
+    - plasma-widget-drop2ftp
+    - proftpd
+    - proftpd-abi-1.3.5rc3
+    - proftpd-basic
+    - proftpd-dev
+    - proftpd-doc
+    - proftpd-mod-autohost
+    - proftpd-mod-case
+    - proftpd-mod-clamav
+    - proftpd-mod-dnsbl
+    - proftpd-mod-fsync
+    - proftpd-mod-geoip
+    - proftpd-mod-ldap
+    - proftpd-mod-msg
+    - proftpd-mod-mysql
+    - proftpd-mod-odbc
+    - proftpd-mod-pgsql
+    - proftpd-mod-sqlite
+    - proftpd-mod-tar
+    - proftpd-mod-vroot
+    - pure-ftpd
+    - pure-ftpd-common
+    - pure-ftpd-ldap
+    - pure-ftpd-mysql
+    - pure-ftpd-postgresql
+    - pyftpd
+    - python-ftp-cloudfs
+    - python-obexftp
+    - python-pyftpdlib
+    - python-tftpy
+    - python-txtftp
+    - python2.7-obexftp
+    - python2.7-pyftpdlib
+    - tcos-tftp-dhcp
+    - tftp
+    - tftp-hpa
+    - tftpd
+    - tftpd-hpa
+    - tnftp
+    - twoftpd
+    - twoftpd-run
+    - uec-provisioning-tftpd
+    - vsftpd
+    - zftp
+  become: yes
+

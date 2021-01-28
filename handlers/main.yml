@@ -1,2 +1,15 @@
 ---
-# handlers file for security
+# handlers for security tasks
+
+- name: restart auditd
+  service:
+    name: "auditd"
+    state: restarted
+  become: yes
+
+
+- name: restart sshd
+  service:
+    name: "ssh"
+    state: restarted
+  become: yes

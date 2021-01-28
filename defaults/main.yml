@@ -1,2 +1,73 @@
 ---
-# defaults file for security
+# defaults for security-related variables
+
+##
+## auditd-related variables
+##
+
+# larger than normal buffer to handle more messages
+security_auditd_buffer_size: 8192
+
+# sets the failure mode to: panic
+security_auditd_failure_mode: 2
+
+# enable Kerberos 5 for authentication and encryption
+security_auditd_enable_kerberos: no
+
+
+##
+## login-related variables
+##
+
+# number of concurrent logins for each user
+security_maxlogins: 10
+
+# number of seconds of inactivity before a user is logged out
+security_login_timeout: 3600
+
+
+##
+## password-related variables
+##
+
+# maximum number of days a password may be used
+# (-1 will disable this restriction)
+security_password_max_days: -1
+
+# minumum number of days allowed between password changes
+# (-1 will disable this restriction)
+security_password_min_days: 1
+
+# maximum number of login retries
+security_password_max_retries: 3
+
+# maximum amount of time in seconds for the login
+security_password_login_timeout: 60
+
+# seconds before being allowed another attempt after a login failure
+security_password_fail_delay: 4
+
+
+##
+## SSH-related variables
+##
+
+# SSH port to use (default: 22 -- not recommended)
+security_sshd_port: 22
+
+
+##
+## sudo-related variables
+##
+
+# list of specific usernames that are allowed unrestricted sudo use
+security_sudo_users: []
+
+# list of specific usernames that are allowed unrestricted sudo use
+# WITH NO PASSWORD!
+# (this should be used VERY sparingly)
+security_sudo_nopasswd_users: []
+
+# list of specific groups that are allowed unrestricted sudo use
+# (this is discouraged for a more secure system)
+security_sudo_groups: []

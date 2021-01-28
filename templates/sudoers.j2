@@ -1,0 +1,106 @@
+# {{ ansible_managed }}
+#
+# Sudoers allows particular users to run various commands as
+# the root user, without needing the root password.
+#
+
+
+##
+# Defaults specification
+##
+
+#
+# Disable "ssh hostname sudo <cmd>", because it will show the password in clear.
+#         You have to run "ssh -t hostname sudo <cmd>".
+#
+#Defaults    requiretty
+
+#
+# Allows for Ansible to execute sudo commands since sshed commands do not
+# allocated a tty and sudo normally will refuse to run without a tty.
+#
+Defaults    !visiblepw
+
+
+#
+# Preserving HOME has security implications since many programs
+# use it when searching for configuration files. Note that HOME
+# is already set when the the env_reset option is enabled, so
+# this option is only effective for configurations where either
+# env_reset is disabled or HOME is present in the env_keep list.
+#
+Defaults    always_set_home
+
+Defaults    env_reset
+#Defaults    exempt_group=sudo
+Defaults    mail_badpass
+Defaults    env_keep =  "COLORS DISPLAY HOSTNAME HISTSIZE INPUTRC KDEDIR LS_COLORS"
+Defaults    env_keep += "MAIL PS1 PS2 QTDIR USERNAME LANG LC_ADDRESS LC_CTYPE"
+Defaults    env_keep += "LC_COLLATE LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES"
+Defaults    env_keep += "LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER LC_TELEPHONE"
+Defaults    env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"
+
+#
+# Adding HOME to env_keep may enable a user to run unrestricted
+# commands via sudo.
+#
+# Defaults   env_keep += "HOME"
+
+Defaults    secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+# Only one minute to enter the password
+Defaults    passwd_timeout=1
+
+
+##
+# Host alias specification
+##
+
+
+##
+# User alias specification
+##
+
+
+##
+# Cmnd alias specification
+##
+
+
+##
+# User privilege specification
+##
+
+# Allow root to run any command anywhere
+root                            ALL=(ALL:ALL)       ALL
+
+{% if security_sudo_users %}
+# Allow admin users to run any command anywhere
+{% for _username in security_sudo_users %}
+{{ _username }}                 ALL=(ALL:ALL)       ALL
+{% endfor %}
+{% endif %}
+
+{% if devops_user is defined %}
+# Allow the devops user to run any command anywhere, without password
+{{ devops_user }}               ALL=(ALL:ALL)       NOPASSWD:ALL
+{% endif %}
+
+{% if security_sudo_nopasswd_users %}
+# Allow the special user to run any command anywhere, without password
+{% for _username in security_sudo_nopasswd_users %}
+{{ _username }}                 ALL=(ALL:ALL)       NOPASSWD:ALL
+{% endfor %}
+{% endif %}
+
+
+##
+# Group privilege specification
+##
+
+{% if security_sudo_groups %}
+# Allow admin groups to run any command anywhere
+{% for _group in security_sudo_groups %}
+%{{ _group }}                   ALL=(ALL:ALL)       ALL
+{% endfor %}
+{% endif %}

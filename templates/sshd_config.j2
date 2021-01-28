@@ -1,0 +1,90 @@
+##
+## {{ ansible_managed }}
+##
+
+Port {{ security_sshd_port }}
+Protocol 2
+
+
+# Ciphers -- specifies the ciphers allowed for protocol version 2
+#            in order of preference
+Ciphers aes256-ctr,aes192-ctr,aes128-ctr
+
+
+# MACs -- specifies the MAC (Message Authentication Code) algorithms
+#         in order of preference
+Macs hmac-sha2-512,hmac-sha2-256
+
+
+# Logging
+SyslogFacility AUTHPRIV
+LogLevel INFO
+
+
+# Authentication
+PermitRootLogin no
+LoginGraceTime 1m
+PermitEmptyPasswords no
+ChallengeResponseAuthentication yes
+StrictModes yes
+
+
+# Host-based authentication
+IgnoreRhosts yes
+RhostsRSAAuthentication no
+HostbasedAuthentication no
+IgnoreUserKnownHosts yes
+
+
+# Key-based authentication
+RSAAuthentication yes
+PubkeyAuthentication yes
+AuthorizedKeysFile %h/.ssh/authorized_keys
+
+
+# GSSAPI authentication
+GSSAPIAuthentication yes
+GSSAPICleanupCredentials yes
+
+
+# Connection timeout
+ClientAliveCountMax 0
+ClientAliveInterval 3600
+TCPKeepAlive yes
+
+
+# Tunneling/forwarding
+X11Forwarding no
+PermitTunnel no
+AllowTcpForwarding yes
+
+
+# Display
+PrintMotd no
+PrintLastLog yes
+#Banner /etc/issue.net
+
+
+# Environment variables
+#   Allows client to pass specific local environment variables
+AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
+AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
+AcceptEnv LC_IDENTIFICATION LC_ALL LANGUAGE
+AcceptEnv XMODIFIERS
+
+
+# External systems
+UsePAM yes
+UseDNS no
+
+
+# SFTP system
+Subsystem  sftp  /usr/lib/openssh/sftp-server
+
+
+# User/machine specific configurations
+{% if devops_user is defined %}
+Match User {{ devops_user }}
+    PasswordAuthentication no
+AllowUsers {{ devops_user }}@{{ controller_ip }}
+{% endif %}

@@ -1,0 +1,50 @@
+---
+# Set network level protections
+
+- name: "network : disable IPv6 auto configuration (default network)"
+  lineinfile:
+    path: /etc/sysctl.conf
+    line: "net.ipv6.conf.default.autoconf = 0"
+    regex: '^(#?)net.ipv6.conf.default.autoconf'
+  become: yes
+
+
+# Deny ICMP reqdirects to prevent man-in-the-middle (MITM) attacks
+
+- name: "network : do not accept IPv6 ICMP redirects (all networks)"
+  lineinfile:
+    path: /etc/sysctl.conf
+    line: "net.ipv6.conf.all.accept_redirects = 0"
+    regex: '^(#?)net.ipv6.conf.all.accept_redirects'
+  become: yes
+
+- name: "network : do not accept IPv4 ICMP redirects (all networks)"
+  lineinfile:
+    path: /etc/sysctl.conf
+    line: "net.ipv4.conf.all.accept_redirects = 0"
+    regex: '^(#?)net.ipv4.conf.all.accept_redirects'
+  become: yes
+
+- name: "network : do not accept IPv4 ICMP redirects (default network)"
+  lineinfile:
+    path: /etc/sysctl.conf
+    line: "net.ipv4.conf.default.accept_redirects = 0"
+    regex: '^(#?)net.ipv4.conf.default.accept_redirects'
+  become: yes
+
+
+# Do not send ICMP redirects because we are not a router
+
+- name: "network : do not send IPv4 ICMP redirects (all networks)"
+  lineinfile:
+    path: /etc/sysctl.conf
+    line: "net.ipv4.conf.all.send_redirects = 0"
+    regex: '^(#?)net.ipv4.conf.all.send_redirects'
+  become: yes
+
+- name: "network : do not send IPv4 ICMP redirects (default network)"
+  lineinfile:
+    path: /etc/sysctl.conf
+    line: "net.ipv4.conf.default.send_redirects = 0"
+    regex: '^(#?)net.ipv4.conf.default.send_redirects'
+  become: yes

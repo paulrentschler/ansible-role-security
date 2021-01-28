@@ -1,38 +1,123 @@
-Role Name
-=========
+paulrentschler.security
+=======================
 
-A brief description of the role goes here.
+Apply good security practices to Ubuntu Linux machines.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+None.
+
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+The following variables are available with defaults defined in `defaults/main.yml`:
+
+### auditd-related variables
+
+Specify a larger than normal buffer to handle more messages.
+
+    security_auditd_buffer_size: 8192
+
+Set the failure mode to `panic`.
+
+    security_auditd_failure_mode: 2
+
+Enable Kerberos 5 for authentication and encryption.
+
+    security_auditd_enable_kerberos: no
+
+
+### login-related variables
+
+Specify the number of concurrent logins for each user.
+
+    security_maxlogins: 10
+
+Specify the number of seconds of inactivity before a user is logged out (default: 1 hour = 3600 seconds).
+
+    security_login_timeout: 3600
+
+
+### password-related variables
+
+Set the maximum number of days a password may be used before a change is required. (-1 will disable this restriction)
+
+    security_password_max_days: -1
+
+Set the minumum number of days allowed between password changes. (-1 will disable this restriction)
+
+    security_password_min_days: 1
+
+Set the maximum number of login retries.
+
+    security_password_max_retries: 3
+
+Set the maximum amount of time in seconds for the login.
+
+    security_password_login_timeout: 60
+
+Set the number of seconds before being allowed another attempt after a login failure.
+
+    security_password_fail_delay: 4
+
+
+### SSH-related variables
+
+Specify the SSH port to use (default: 22 -- not recommended)
+
+    security_sshd_port: 22
+
+
+### sudo-related variables
+
+List of specific usernames that are allowed unrestricted sudo use.
+
+    security_sudo_users: []
+
+List of specific usernames that are allowed unrestricted sudo use **WITH NO PASSWORD!** (this should be used VERY sparingly)
+
+    security_sudo_nopasswd_users: []
+
+List of specific groups that are allowed unrestricted sudo use. (this is discouraged for a more secure system)
+
+    security_sudo_groups: []
+
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+None.
+
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+Simple version:
 
-    - hosts: servers
+    - hosts: all
       roles:
-         - { role: username.rolename, x: 42 }
+        - paulrentschler.security
+
+
+With customizations:
+
+    - hosts: all
+      roles:
+        - { role: paulrentschler.security,
+            security_sshd_port: 2222,
+            security_sudo_users: ["fred", "jane"],
+            }
+
 
 License
 -------
 
-BSD
+MIT
+
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Created by Paul Rentschler in 2021.
