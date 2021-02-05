@@ -82,11 +82,16 @@ root                            ALL=(ALL:ALL)       ALL
 {% endif %}
 
 {% if devops_user is defined %}
+{% if security_block_passwordless_sudo|bool %}
+# Allow the devops user to run any command anywhere
+{{ devops_user }}               ALL=(ALL:ALL)       ALL
+{% else %}
 # Allow the devops user to run any command anywhere, without password
 {{ devops_user }}               ALL=(ALL:ALL)       NOPASSWD:ALL
 {% endif %}
+{% endif %}
 
-{% if security_sudo_nopasswd_users %}
+{% if security_sudo_nopasswd_users and not security_block_passwordless_sudo|bool %}
 # Allow the special user to run any command anywhere, without password
 {% for _username in security_sudo_nopasswd_users %}
 {{ _username }}                 ALL=(ALL:ALL)       NOPASSWD:ALL

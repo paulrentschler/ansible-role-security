@@ -74,6 +74,12 @@ Specify the SSH port to use (default: 22 -- not recommended)
 
 ### sudo-related variables
 
+Prevent users from being granted sudo rights without needing a password by changing this value to `yes`.
+
+    security_block_passwordless_sudo: no
+
+**NOTE**: This only prevents **the role** from adding entries to the `sudoers` file that would grant users password-less sudo rights. It does not prevent password-less sudo if the file is manually edited.
+
 List of specific usernames that are allowed unrestricted sudo use.
 
     security_sudo_users: []

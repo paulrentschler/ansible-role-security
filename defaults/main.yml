@@ -88,6 +88,9 @@ security_sftp_users: []
 ## sudo-related variables
 ##
 
+# prevent passwordless sudo use
+security_block_passwordless_sudo: no
+
 # list of specific usernames that are allowed unrestricted sudo use
 security_sudo_users: []
 
