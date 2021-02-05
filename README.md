@@ -1,6 +1,8 @@
 paulrentschler.security
 =======================
 
+[![MIT licensed][mit-badge]][mit-link]
+
 Apply good security practices to Ubuntu Linux machines.
 
 Requirements
@@ -114,10 +116,14 @@ With customizations:
 License
 -------
 
-MIT
+[MIT][mit-link]
 
 
 Author Information
 ------------------
 
 Created by Paul Rentschler in 2021.
+
+
+[mit-badge]: https://img.shields.io/badge/license-MIT-blue.svg
+[mit-link]: https://github.com/paulrentschler/ansible-role-security/blob/master/LICENSE
