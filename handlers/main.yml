@@ -1,15 +1,15 @@
 ---
 # handlers for security tasks
 
-- name: restart auditd
-  service:
-    name: "auditd"
+- name: security restart auditd
+  ansible.builtin.service:
+    name: auditd
     state: restarted
   become: yes
 
 
-- name: restart sshd
-  service:
-    name: "ssh"
+- name: security restart sshd
+  ansible.builtin.service:
+    name: ssh
     state: restarted
   become: yes

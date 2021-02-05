@@ -40,7 +40,7 @@
     validate: /usr/sbin/sshd -t -f %s
     backup: yes
   become: yes
-  notify: restart sshd
+  notify: security restart sshd
 
 - name: "localaccounts : find any .shosts files"
   find:

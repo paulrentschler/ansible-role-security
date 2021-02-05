@@ -14,7 +14,7 @@
     mode: '0640'
     backup: yes
   notify:
-    - restart auditd
+    - security restart auditd
 
 - name: "auditd : configure audit remote sending"
   template:
@@ -24,7 +24,7 @@
     backup: yes
   when: security_audit_remote_sending|bool
   notify:
-    - restart auditd
+    - security restart auditd
 
 - name: "auditd : ensure auditd is started"
   service:
