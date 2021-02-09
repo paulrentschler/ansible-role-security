@@ -72,21 +72,18 @@ security_pam_minimum_uid: 1000
 security_pam_minimum_password_length: 15
 
 
-### TODO: implement this
+# enable account lockouts for too many failed login attempts
 security_pam_account_lockouts: yes
+
+# number of failed attempts before the account is locked
+security_pam_failed_attempts_max: 25
+
+# number of seconds to wait before automatically unlocking an account
+security_pam_account_unlock_time: 900
 
 
 # allow login credentials to be cached
 security_pam_cache_credentials: yes
-
-# include configuration to do second-factor authentication with Duo
-security_pam_use_duo: no
-
-# use Duo 2FA for local unix accounts
-security_pam_duo_local_users: no
-
-# path to the Duo PAM module
-security_pam_duo_module_path: /lib64/security/pam_duo.so
 
 # include configuration to reference /etc/security/access.conf
 #   for host, domain, IP address, or terminal type login restrictions
@@ -98,6 +95,15 @@ security_pam_use_krb5: no
 # include configuration to lookup users/groups with LDAP
 security_pam_use_ldap: no
 
+
+# include configuration to do second-factor authentication with Duo
+security_pam_use_duo: no
+
+# use Duo 2FA for local unix accounts
+security_pam_duo_local_users: no
+
+# path to the Duo PAM module
+security_pam_duo_module_path: /lib64/security/pam_duo.so
 
 
 

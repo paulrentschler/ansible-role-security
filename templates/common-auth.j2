@@ -16,6 +16,8 @@
 #
 # {{ ansible_managed }}
 #
+{% set deny_count = security_pam_failed_attempts_max %}
+{% set unlock_time = security_pam_account_unlock_time %}
 {% set min_uid = security_pam_minimum_uid %}
 {% set duo_path = security_pam_duo_module_path %}
 {% set duo_local = security_pam_duo_local_users %}
@@ -90,6 +92,13 @@
 {% endcomment %}
 
 # here are the per-package modules (the "Primary" block)
+
+{% if security_pam_account_lockouts|bool %}
+# sets the failure delay in microseconds
+auth       required                        pam_faildelay.so delay={{ security_password_fail_delay * 1000000 }}
+# count the number of failed logins
+auth       required                        pam_tally2.so silent audit deny={{ deny_count }} onerr=fail even_deny_root unlock_time={{ unlock_time }}
+{% endif %}
 
 {% if krb5|bool %}
 # authenticate against Kerberos
