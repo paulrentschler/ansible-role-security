@@ -68,5 +68,3 @@
     backup: yes
   become: yes
 
-
-
