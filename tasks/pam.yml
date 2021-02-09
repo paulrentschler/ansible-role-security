@@ -9,7 +9,14 @@
 # should set `security_pam_harden: no` which will skip these tasks.
 #
 
-
+- name: install password quality enforcement tools
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - libpam-pwquality
+    - cracklib-runtime
+  become: yes
 
 - name: define the common-account configuration
   ansible.builtin.template:

@@ -68,8 +68,8 @@ security_pam_harden: yes
 # define the minimum uid used for non-local accounts
 security_pam_minimum_uid: 1000
 
-# set this to zero to disable the minimum password length requirement
-security_pam_minimum_password_length: 15
+# number of passwords to remember to avoid frequent password alternation
+security_pam_password_history_count: 5
 
 
 # enable account lockouts for too many failed login attempts
