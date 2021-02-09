@@ -1,0 +1,65 @@
+---
+# Configure PAM for with additional security options
+#
+# Given the complexity and potential for disaster associated with modifying
+# existing PAM configurations, the tasks below back up and REPLACE the
+# PAM configuration.
+#
+# If you have a custom PAM configuration that cannot be met by this role, you
+# should set `security_pam_harden: no` which will skip these tasks.
+#
+
+
+
+- name: define the common-account configuration
+  ansible.builtin.template:
+    src: common-account.j2
+    dest: /etc/pam.d/common-account
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  become: yes
+
+- name: define the common-auth configuration
+  ansible.builtin.template:
+    src: common-auth.j2
+    dest: /etc/pam.d/common-auth
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  become: yes
+
+- name: define the common-password configuration
+  ansible.builtin.template:
+    src: common-password.j2
+    dest: /etc/pam.d/common-password
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  become: yes
+
+- name: define the common-session configuration
+  ansible.builtin.template:
+    src: common-session.j2
+    dest: /etc/pam.d/common-session
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  become: yes
+
+- name: define the common-session-noninteractive configuration
+  ansible.builtin.template:
+    src: common-session-noninteractive.j2
+    dest: /etc/pam.d/common-session-noninteractive
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  become: yes
+
+
+

@@ -7,16 +7,16 @@
 
 
 # Establish additional logging with auditd
-- import_tasks: auditd.yml
+- include_tasks: auditd.yml
   become: yes
 
 
 # Limit the use of local accounts
-- import_tasks: localaccounts.yml
+- include_tasks: localaccounts.yml
 
 
 # Set network level protections
-- import_tasks: network.yml
+- include_tasks: network.yml
 
 
 # more IP spoofing prevention
@@ -32,7 +32,12 @@
 
 
 # Set password restrictions/standards/complexity
-- import_tasks: passwords.yml
+- include_tasks: passwords.yml
+
+
+# Add additional security options to the PAM configuration
+- include_tasks: pam.yml
+  when: security_pam_harden|bool
 
 
 # Protect shared memory by mounting it read-only

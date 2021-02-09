@@ -1,0 +1,85 @@
+#
+# /etc/pam.d/common-auth - authentication settings common to all services
+#
+# This file is included from other service-specific PAM config files,
+# and should contain a list of the authentication modules that define
+# the central authentication scheme for use on the system
+# (e.g., /etc/shadow, LDAP, Kerberos, etc.).  The default is to use the
+# traditional Unix authentication mechanisms.
+#
+# As of pam 1.0.1-6, this file is managed by pam-auth-update by default.
+# To take advantage of this, it is recommended that you configure any
+# local modules either before or after the default block, and use
+# pam-auth-update to manage selection of other modules.  See
+# pam-auth-update(8) for details.
+
+#
+# {{ ansible_managed }}
+#
+{% set min_uid = security_pam_minimum_uid %}
+{% set duo_path = security_pam_duo_module_path %}
+{% set duo_local = security_pam_duo_local_users %}
+{% set duo = security_pam_use_duo %}
+{% set krb5 = security_pam_use_krb5 %}
+{% set ldap = security_pam_use_ldap %}
+{% set caching = 'no' %}
+{% set caching_skips = 0 %}
+{% set ldap_skips = 0 %}
+{% set unix_skips = 0 %}
+{% set krb5_skips = 0 %}
+{% if security_pam_cache_credentials|bool %}
+  {% if krb5|bool or ldap|bool %}
+    {% set caching = 'yes' %}
+    {% set caching_skips = 2 + duo|bool|int %}
+  {% endif %}
+{% endif %}
+{% set ldap_skips = caching_skips + (1 - duo|bool|int) - (duo|bool|int * caching|bool|int) %}
+{% set unix_skips = (1 + ldap|bool|int) + (2 * caching|bool|int) + duo|bool|int - (2 * duo_local|bool|int * duo|bool|int) %}
+{% set krb5_skips = unix_skips + ((-1 * duo|bool|int) + 1) + (2 * duo_local|bool|int) %}
+
+# here are the per-package modules (the "Primary" block)
+
+{% if krb5|bool %}
+# authenticate against Kerberos
+auth       [success={{ krb5_skips }} default=ignore]      pam_krb5.so minimum_uid={{ min_uid }}
+# authenticate against the local Unix accounts, if none of the above methods succeeded
+auth       [success={{ unix_skips }} default=ignore]      pam_unix.so nullok_secure try_first_pass
+{% else %}
+# authenticate against the local Unix accounts
+auth       [success={{ unix_skips }} default=ignore]      pam_unix.so nullok_secure
+{% endif %}
+
+{% if ldap|bool %}
+# authenticate against LDAP, if none of the above methods succeeded
+auth       [success={{ ldap_skips }} default=ignore]      pam_ldap.so use_first_pass
+{% endif %}
+
+
+{% if caching|bool %}
+# check cached credentials, if none of the above methods succeeded
+auth       [success={{ caching_skips }} default=ignore]      pam_ccreds.so minimum_uid={{ min_uid }} action=validate use_first_pass
+auth       [default=ignore]                pam_ccreds.so minimum_uid={{ min_uid }} action=update
+{% endif %}
+
+{% if duo|bool %}
+auth       [success=1 default=ignore]      {{ duo_path }}
+{% endif %}
+
+# here is the fallback if no module succeeds; deny access
+auth       requisite                       pam_deny.so
+
+# prime the stack with a positive return value if there isn't one already;
+# this avoids us returning an error just because nothing sets a success code
+# since the modules above will each just jump around
+{% if security_pam_use_login_access_restrictions|bool %}
+auth       required                        pam_access.so
+{% endif %}
+auth       required                        pam_permit.so
+
+# and here are more per-package modules (the "Additional" block)
+{% if caching|bool %}
+auth       optional                        pam_ccreds.so minimum_uid={{ min_uid }} action=store
+{% endif %}
+auth       optional                        pam_cap.so
+
+# end of pam-auth-update config
