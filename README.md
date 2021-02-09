@@ -65,11 +65,59 @@ Set the number of seconds before being allowed another attempt after a login fai
     security_password_fail_delay: 4
 
 
+
+
+
+
+
+
+
+
 ### SSH-related variables
 
 Specify the SSH port to use (default: 22 -- not recommended)
 
     security_sshd_port: 22
+
+Specify the users allowed to SSH into the server.
+
+Each entry must have a "name" attribute that specifies the username
+
+Each entry can have an optional "host" attribute
+
+Example:
+```yaml
+security_ssh_users:
+  - tom:
+      name: tom
+      host: 192.168.0.*
+  - user2:
+      name: jane
+  - {name: joan, host: 192.168.0.150}
+```
+
+    security_ssh_users: []
+
+Specify the groups allowed to SSH into the server.
+
+Each entry must have a "name" attribute that specifies the group name
+
+Each entry can have an optional "host" attribute
+
+    security_ssh_groups: []
+
+Specify the users with specific (and limited) SFTP access.
+
+Each entry must have a "name" attribute that specifies the username
+
+The following optional attributes (with their default values) are supported:
+
+  * 'chroot' -- specify the chroot jail directory (default: %h/public_html)
+  * 'x11forwarding' -- is X11 forwarding permitted? (default: no)
+  * 'allowagentforwarding' -- is ssh-agent forwarding permitted? (default: no)
+  * 'allowtcpforwarding' -- is TCP forwarding permitted? (default: no)
+
+        security_sftp_users: []
 
 
 ### sudo-related variables
