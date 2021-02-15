@@ -19,15 +19,20 @@
 
 
 # more IP spoofing prevention
-- name: "prevent IP spoofing"
-  ansible.builtin.copy:
-    backup: yes
-    dest: /etc/host.conf
-    group: root
-    mode: 644
-    owner: root
-    src: host.conf
-  become: yes
+# NOTE: removed because both lines generated "bad command" errors.
+#       These are apparently obsolete options that have no effect anymore
+#       per: https://serverfault.com/a/890052/209018
+#       Further the host.conf man page indicates that since glibc 2.0.7
+#       nospoof was recognized but never implemented.
+# - name: "prevent IP spoofing"
+#   ansible.builtin.copy:
+#     backup: yes
+#     dest: /etc/host.conf
+#     group: root
+#     mode: 644
+#     owner: root
+#     src: host.conf
+#   become: yes
 
 
 # Set password restrictions/standards/complexity
