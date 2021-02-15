@@ -39,7 +39,7 @@ IgnoreUserKnownHosts yes
 # Key-based authentication
 RSAAuthentication yes
 PubkeyAuthentication yes
-AuthorizedKeysFile %h/.ssh/authorized_keys
+AuthorizedKeysFile {{ '%h/.ssh/authorized_keys' }}
 
 
 # GSSAPI authentication
@@ -120,7 +120,7 @@ Match User {{ devops_user }}
 # Configure SFTP users
 {% for _user in security_sftp_users %}
 Match User {{ _user.name }}
-    ChrootDirectory {{ user.chroot|default(%h/public_html) }}
+    ChrootDirectory {{ user.chroot|default('%h/public_html') }}
     X11Forwarding {{ user.x11forwarding|default(no) }}
     AllowAgentForwarding {{ user.allowagentforwarding|default(no) }}
     AllowTcpForwarding {{ user.allowtcpforwarding|default(no) }}

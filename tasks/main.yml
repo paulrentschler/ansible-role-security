@@ -10,12 +10,12 @@
   include_tasks: auditd.yml
 
 
-# Limit the use of local accounts
-- include_tasks: localaccounts.yml
+- name: "limit the use of local accounts"
+  include_tasks: localaccounts.yml
 
 
-# Set network level protections
-- include_tasks: network.yml
+- name: "set network level protections"
+  include_tasks: network.yml
 
 
 # more IP spoofing prevention
@@ -35,18 +35,18 @@
 #   become: yes
 
 
-# Set password restrictions/standards/complexity
-- include_tasks: passwords.yml
+- name: "set password restrictions/standards/complexity"
+  include_tasks: passwords.yml
 
 
-# Add additional security options to the PAM configuration
-- include_tasks: pam.yml
+- name: "add additional security options to the PAM configuration"
+  include_tasks: pam.yml
   when: security_pam_harden|bool
 
 
 # Protect shared memory by mounting it read-only
 # credit: https://help.ubuntu.com/community/StricterDefaults
-- name: protect shared memory
+- name: "protect shared memory"
   block:
     - name: configure shared memory to be mounted read-only
       ansible.builtin.lineinfile:
@@ -63,7 +63,7 @@
 
 
 # Limit administrative account to elevate privileges
-- name: limit sudo to only administrative accounts
+- name: "limit sudo to only administrative accounts"
   template:
     src: sudoers.j2
     dest: /etc/sudoers
@@ -79,7 +79,7 @@
   package:
     name: "{{ item }}"
     state: absent
-  items:
+  loop:
     - dcap-tunnel-telnet
     - inetutils-telnet
     - inetutils-telnetd
@@ -102,7 +102,7 @@
   package:
     name: "{{ item }}"
     state: absent
-  items:
+  loop:
     - atftp
     - atftpd
     - bareftp
