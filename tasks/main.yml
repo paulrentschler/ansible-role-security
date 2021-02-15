@@ -55,8 +55,9 @@
         regex: '^.*/run/shm.*'
       register: _fstab_updated
     - name: remount shared memory
-      ansible.builtin.command:
-        cmd: mount -o remount /run/shm
+      ansible.posix.mount:
+        path: /run/shm
+        state: remounted
       when: _fstab_updated.changed
   become: yes
 
