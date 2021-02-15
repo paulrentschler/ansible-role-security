@@ -6,6 +6,7 @@
     name: "auditd"
     state: present
     update_cache: yes
+  become: yes
 
 - name: "auditd : configure auditd"
   template:
@@ -15,6 +16,7 @@
     backup: yes
   notify:
     - security restart auditd
+  become: yes
 
 - name: "auditd : configure audit remote sending"
   template:
@@ -25,9 +27,11 @@
   when: security_audit_remote_sending|bool
   notify:
     - security restart auditd
+  become: yes
 
 - name: "auditd : ensure auditd is started"
   service:
     name: "auditd"
     state: started
     enabled: yes
+  become: yes
