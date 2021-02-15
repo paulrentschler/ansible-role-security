@@ -36,7 +36,7 @@
   become: yes
 
 
-​- name: "network : ip spoofing protection"
+- name: "network : ip spoofing protection"
   ansible.builtin.lineinfile:
     path: /etc/sysctl.conf
     line: "net.{{ item }}.rp_filter = 1"
@@ -46,16 +46,16 @@
     - "ipv4.conf.default"
   become: yes
 
-​
-​- name: "network : ignore ICMP broadcast requests"
+
+- name: "network : ignore ICMP broadcast requests"
   ansible.builtin.lineinfile:
     path: /etc/sysctl.conf
     line: "net.ipv4.icmp_echo_ignore_broadcasts = 1"
     regex: '^(#?)net.ipv4.icmp_echo_ignore_broadcasts'
   become: yes
-​
 
-​- name: "network : disable source packet routing"
+
+- name: "network : disable source packet routing"
   ansible.builtin.lineinfile:
     path: /etc/sysctl.conf
     line: "net.{{ item }}.accept_source_route = 0"
@@ -67,8 +67,8 @@
     - "ipv6.conf.default"
   become: yes
 
-​
-​- name: "network : block SYN attacks"
+
+- name: "network : block SYN attacks"
   ansible.builtin.lineinfile:
     path: /etc/sysctl.conf
     line: "net.ipv4.{{ item.name }} = {{ item.value }}"
@@ -84,7 +84,7 @@
       value: 5
   become: yes
 
-​
+
 # A Martian packet (packet from Mars) is an IP packet which specifies
 # a source or destination address that is reserved for special-use
 # by Internet Assigned Numbers Authority (IANA).
@@ -92,7 +92,7 @@
 # Examples:
 #   10.0.0.0/8
 #   192.168.0.0/16
-​- name: "network : log martians"
+- name: "network : log martians"
   ansible.builtin.lineinfile:
     path: /etc/sysctl.conf
     line: "net.ipv4.{{ item }} = 1"
@@ -100,7 +100,6 @@
   loop:
     - "conf.all.log_martians"
     - "conf.default.log_martians"
-​    - "icmp_ignore_bogus_error_responses"
-​  become: yes
-​
-​
+    - "icmp_ignore_bogus_error_responses"
+  become: yes
+
