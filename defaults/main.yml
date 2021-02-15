@@ -11,9 +11,11 @@ security_auditd_buffer_size: 8192
 # sets the failure mode to: panic
 security_auditd_failure_mode: 2
 
+# enable audit logs to be sent to a remote server
+security_audit_remote_sending: no
+
 # enable Kerberos 5 for authentication and encryption
 security_auditd_enable_kerberos: no
-
 
 ##
 ## login-related variables

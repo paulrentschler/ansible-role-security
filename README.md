@@ -26,6 +26,10 @@ Set the failure mode to `panic`.
 
     security_auditd_failure_mode: 2
 
+Enable audit logs to be sent to a remote server by setting this to `yes`.
+
+    security_audit_remote_sending: no
+
 Enable Kerberos 5 for authentication and encryption.
 
     security_auditd_enable_kerberos: no
