@@ -59,6 +59,11 @@
         path: /run/shm
         state: remounted
       when: _fstab_updated.changed
+      register: _remount_result
+      retries: 5
+      delay: 10
+      until: _remount_result is not failed
+      ignore_errors: yes
   become: yes
 
 
