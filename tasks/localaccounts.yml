@@ -30,6 +30,18 @@
 ## Validate SSH config
 ##
 
+- name: "localaccounts : install logon banners"
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/etc/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - issue
+    - issue.net
+  become: yes
+
 - name: "localaccounts : configure sshd"
   template:
     src: sshd_config.j2
