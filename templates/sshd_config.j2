@@ -31,13 +31,13 @@ StrictModes yes
 
 # Host-based authentication
 IgnoreRhosts yes
-RhostsRSAAuthentication no
+#RhostsRSAAuthentication no
 HostbasedAuthentication no
 IgnoreUserKnownHosts yes
 
 
 # Key-based authentication
-RSAAuthentication yes
+#RSAAuthentication yes
 PubkeyAuthentication yes
 AuthorizedKeysFile {{ '%h/.ssh/authorized_keys' }}
 
