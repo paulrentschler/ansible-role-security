@@ -69,7 +69,7 @@
 
 # Limit administrative account to elevate privileges
 - name: "limit sudo to only administrative accounts"
-  template:
+  ansible.builtin.template:
     src: sudoers.j2
     dest: /etc/sudoers
     validate: 'visudo -cf %s'
@@ -81,7 +81,7 @@
 ##
 
 - name: "uninstall telnet-related tools"
-  package:
+  ansible.builtin.package:
     name: "{{ item }}"
     state: absent
   loop:
@@ -104,7 +104,7 @@
   become: yes
 
 - name: "uninstall ftp-related tools"
-  package:
+  ansible.builtin.package:
     name: "{{ item }}"
     state: absent
   loop:
