@@ -42,6 +42,7 @@
 - name: "add additional security options to the PAM configuration"
   include_tasks: pam.yml
   when: security_pam_harden|bool
+  tags: always
 
 
 # Protect shared memory by mounting it read-only

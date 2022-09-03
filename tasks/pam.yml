@@ -27,6 +27,8 @@
     mode: 0644
     backup: yes
   become: yes
+  tags:
+    - security_pam_config
 
 - name: define the common-auth configuration
   ansible.builtin.template:
@@ -37,6 +39,8 @@
     mode: 0644
     backup: yes
   become: yes
+  tags:
+    - security_pam_config
 
 - name: define the common-password configuration
   ansible.builtin.template:
@@ -47,6 +51,8 @@
     mode: 0644
     backup: yes
   become: yes
+  tags:
+    - security_pam_config
 
 - name: define the common-session configuration
   ansible.builtin.template:
@@ -57,6 +63,8 @@
     mode: 0644
     backup: yes
   become: yes
+  tags:
+    - security_pam_config
 
 - name: define the common-session-noninteractive configuration
   ansible.builtin.template:
@@ -67,4 +75,6 @@
     mode: 0644
     backup: yes
   become: yes
+  tags:
+    - security_pam_config
 
