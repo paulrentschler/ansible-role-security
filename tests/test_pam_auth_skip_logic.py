@@ -1,3 +1,4 @@
+import sys
 import unittest
 
 
@@ -53,6 +54,12 @@ class SkipLogic(object):
     """
 
     def __init__(self, duo_local, duo, caching, krb5, ldap):
+        self.duo_local = duo_local
+        self.duo = duo
+        self.caching = caching
+        self.krb5 = krb5
+        self.ldap = ldap
+
         self.caching_skips = 0
         self.krb5_skips = 0
         self.unix_skips = 0
@@ -63,6 +70,52 @@ class SkipLogic(object):
         self.ldap_skips = self.caching_skips + (1 - duo) - (duo * caching)
         self.unix_skips = (1 + ldap) + (2 * caching) + duo - (2 * duo_local * duo)
         self.krb5_skips = self.unix_skips + 1 + (-2 * duo) + (2 * duo_local)
+
+    def value(self, entry):
+        field = '{}_skips'.format(entry)
+        value = getattr(self, field)
+        dontcare = '({})'.format(value)
+        if self.duo_local == 1 and self.duo == 0:
+            return dontcare
+        if entry == 'caching':
+            if self.caching == 0:
+                return dontcare
+            else:
+                if self.krb5 == 0 and self.ldap == 0:
+                    return dontcare
+        elif entry == 'krb5':
+            if self.krb5 == 0:
+                return dontcare
+        elif entry == 'ldap':
+            if self.ldap == 0:
+                return dontcare
+        return value
+
+
+def output_logic_table():
+    print('+-----------------------------------------++------------------------------+')  # NOQA
+    print('| INPUTS                                  || SKIPS                        |')  # NOQA
+    print('| duo_local | duo | caching | krb5 | ldap || caching | krb5 | unix | ldap |')  # NOQA
+    print('+-----------+-----+---------+------+------++---------+------+------+------+')  # NOQA
+    for duo in (0, 1):
+        for duo_local in (0, 1):
+            for caching in (0, 1):
+                for krb5 in (0, 1):
+                    for ldap in (0, 1):
+                        x = SkipLogic(duo_local, duo, caching, krb5, ldap)
+                        print('|{:^11}|{:^5}|{:^9}|   {}  |   {}  ||{:^9}|  {:^3} |  {:^3} |  {:^3} |'.format(  # NOQA
+                            duo_local,
+                            duo,
+                            caching,
+                            krb5,
+                            ldap,
+                            x.value('caching'),
+                            x.value('krb5'),
+                            x.value('unix'),
+                            x.value('ldap'),
+                        ))
+                print('+-----------+-----+---------+------+------++---------+------+------+------+')  # NOQA
+        print('+-----------+-----+---------+------+------++---------+------+------+------+')  # NOQA
 
 
 class TestPamAuthSkipLogic(unittest.TestCase):
@@ -203,4 +256,12 @@ class TestPamAuthSkipLogic(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    done = False
+    try:
+        if sys.argv[1].lower() == 'table':
+            output_logic_table()
+            done = True
+    except (AttributeError, IndexError, TypeError):
+        pass
+    if not done:
+        unittest.main()
