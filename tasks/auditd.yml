@@ -23,13 +23,13 @@
     name: "audispd-plugins"
     state: present
     update_cache: yes
-  when: "security_audit_remote_sending|bool and ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int >= 22"
+  when: "security_audit_remote_sending|bool and ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int >= 22"
   become: yes
 
 - name: "auditd : configure audit remote sending"
   template:
     src: "audisp-remote.conf.j2"
-    dest: "/etc{% if ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int >= 22 %}/audit{% else %}/audisp{% endif %}/audisp-remote.conf"
+    dest: "/etc{% if ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int >= 22 %}/audit{% else %}/audisp{% endif %}/audisp-remote.conf"
     mode: '0640'
     backup: yes
   when: security_audit_remote_sending|bool
