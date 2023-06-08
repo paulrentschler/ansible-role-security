@@ -17,7 +17,7 @@
 # {{ ansible_managed }}
 #
 
-{% if security_pam_account_lockouts|bool %}
+{% if security_pam_account_lockouts|bool and ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int < 22  %}
 # reset the count of failed logins
 account    required                                            pam_tally2.so
 {% endif %}

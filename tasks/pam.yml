@@ -9,7 +9,7 @@
 # should set `security_pam_harden: no` which will skip these tasks.
 #
 
-- name: install password quality enforcement tools
+- name: "pam : install password quality enforcement tools"
   ansible.builtin.package:
     name: "{{ item }}"
     state: present
@@ -18,7 +18,20 @@
     - cracklib-runtime
   become: yes
 
-- name: define the common-account configuration
+- name: "pam : configure faillock"
+  ansible.builtin.template:
+    src: faillock.conf.j2
+    dest: /etc/security/faillock.conf
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  when: "ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int >= 22"
+  become: yes
+  tags:
+    - security_pam_config
+
+- name: "pam : define the common-account configuration"
   ansible.builtin.template:
     src: common-account.j2
     dest: /etc/pam.d/common-account
@@ -30,7 +43,7 @@
   tags:
     - security_pam_config
 
-- name: define the common-auth configuration
+- name: "pam : define the common-auth configuration"
   ansible.builtin.template:
     src: common-auth.j2
     dest: /etc/pam.d/common-auth
@@ -42,7 +55,7 @@
   tags:
     - security_pam_config
 
-- name: define the common-password configuration
+- name: "pam : define the common-password configuration"
   ansible.builtin.template:
     src: common-password.j2
     dest: /etc/pam.d/common-password
@@ -54,7 +67,7 @@
   tags:
     - security_pam_config
 
-- name: define the common-session configuration
+- name: "pam : define the common-session configuration"
   ansible.builtin.template:
     src: common-session.j2
     dest: /etc/pam.d/common-session
@@ -66,7 +79,7 @@
   tags:
     - security_pam_config
 
-- name: define the common-session-noninteractive configuration
+- name: "pam : define the common-session-noninteractive configuration"
   ansible.builtin.template:
     src: common-session-noninteractive.j2
     dest: /etc/pam.d/common-session-noninteractive

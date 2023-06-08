@@ -46,8 +46,10 @@
 {% if security_pam_account_lockouts|bool %}
 # sets the failure delay in microseconds
 auth       required                        pam_faildelay.so delay={{ security_password_fail_delay * 1000000 }}
+{% if ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int < 22 %}
 # count the number of failed logins
 auth       required                        pam_tally2.so silent audit deny={{ deny_count }} onerr=fail even_deny_root unlock_time={{ unlock_time }}
+{% endif %}
 {% endif %}
 
 {% if krb5|bool %}
@@ -74,14 +76,22 @@ auth       [default=ignore]                pam_ccreds.so minimum_uid={{ min_uid 
 
 {% if duo|bool %}
 # if nothing succeeded to this point; fail before doing Duo
+{% if ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int < 22 %}
 auth       requisite                       pam_deny.so
+{% else %}
+auth       [default=die]                   pam_faillock.so authfail
+{% endif %}
 
 # second factor authentication via Duo
 auth       [success=1 default=ignore]      {{ duo_path }}
 {% endif %}
 
 # here is the fallback if no module succeeds; deny access
+{% if ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int < 22 %}
 auth       requisite                       pam_deny.so
+{% else %}
+auth       [default=die]                   pam_faillock.so authfail
+{% endif %}
 
 # prime the stack with a positive return value if there isn't one already;
 # this avoids us returning an error just because nothing sets a success code
@@ -90,6 +100,11 @@ auth       requisite                       pam_deny.so
 auth       required                        pam_access.so
 {% endif %}
 auth       required                        pam_permit.so
+
+{% if ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int >= 22 %}
+# clear any previous failed login attempts
+auth       sufficient                      pam_faillock.so authsucc
+{% endif %}
 
 # and here are more per-package modules (the "Additional" block)
 {% if caching|bool %}
