@@ -78,9 +78,9 @@ security_pam_password_history_count: 5
 security_pam_account_lockouts: yes
 
 # number of failed attempts before the account is locked
-security_pam_failed_attempts_max: 4
+security_pam_failed_attempts_max: 6
 
-# number of seconds to wait before automatically unlocking an account
+# number of seconds to wait before automatically unlocking an account (15 min)
 security_pam_account_unlock_time: 900
 
 
