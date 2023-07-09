@@ -76,7 +76,7 @@ root                            ALL=(ALL:ALL)       ALL
 
 {% if security_sudo_users %}
 # Allow admin users to run any command anywhere
-{% for _username in security_sudo_users %}
+{% for _username in security_sudo_users|flatten %}
 {{ _username }}                 ALL=(ALL:ALL)       ALL
 {% endfor %}
 {% endif %}
