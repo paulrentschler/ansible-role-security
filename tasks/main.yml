@@ -4,6 +4,7 @@
 - name: set the controller ip address
   ansible.builtin.set_fact:
     controller_ip: "{{ ansible_env['SSH_CLIENT'].split() | first }}"
+  tags: always
 
 
 - name: "establish additional logging with auditd"
@@ -12,6 +13,7 @@
 
 - name: "limit the use of local accounts"
   include_tasks: localaccounts.yml
+  tags: always
 
 
 - name: "set network level protections"
