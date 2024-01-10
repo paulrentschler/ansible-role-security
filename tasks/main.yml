@@ -17,7 +17,7 @@
   tags: always
 
 
-- name: "configure sshd"
+- name: "configure sshd and sftp"
   include_tasks: sshd.yml
   tags: always
 

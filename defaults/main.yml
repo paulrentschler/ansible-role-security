@@ -143,7 +143,14 @@ security_ssh_groups: []
 # Users with specific (and limited) SFTP access
 #   Each entry must have a "name" attribute that specifies the username
 #   The following optional attributes (with their default values) are supported:
-#     'chroot' -- specify the chroot jail directory (default: %h/public_html)
+#     'group' -- specify the user's primary group (default: system generated)
+#     'chroot' -- specify the chroot jail directory (default: user's homedir)
+#     'password' -- specify the user's password (default: create random)
+#     'sshkey' -- SSH public key for authentication (default: none)
+#     'folders' -- list of folders to create in chroot. A list of dicts with keys:
+#         'name' -- name of the folder
+#         'group' -- group for the folder (default: user's primary group)
+#         'mode' -- mode for the folder (default: 0755)
 #     'x11forwarding' -- is X11 forwarding permitted? (default: no)
 #     'allowagentforwarding' -- is ssh-agent forwarding permitted? (default: no)
 #     'allowtcpforwarding' -- is TCP forwarding permitted? (default: no)

@@ -1,5 +1,76 @@
 ---
-# Configure SSHD
+# Configure SSHD and SFTP
+
+##
+## Create SFTP accounts
+##
+
+- name: "sshd : add SFTP users"
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    password: "{{ item.password|default(lookup('password', '/dev/null encrypt=sha512_crypt')) }}"
+    shell: "/usr/sbin/nologin"
+    # uid: 900+  # any uid value should be fine
+    group: "{{ item.group|default(omit) }}"
+    home: "{{ item.chroot|default(omit) }}"
+    skeleton: no
+    state: present
+    update_password: "{% if item.password is defined %}always{% else %}on_create{% endif %}"
+  loop: "{{ security_sftp_users }}"
+  register: __security_sftp_users
+  become: yes
+  tags:
+    - security_sftp_config
+
+# Install the SFTP user's public SSH key on the remote host
+#   This will enable future passwordless logins using SSH keys
+- name: "sshd : add public key to the SFTP users"
+  ansible.posix.authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ item.sshkey }}"
+    comment: "{{ item.name }}"
+    state: present
+  loop: "{{ security_sftp_users }}"
+  when: item.sshkey is defined
+  become: yes
+  tags:
+    - security_sftp_config
+
+
+
+##
+## Create SFTP folders / set ownership/permissions
+##
+
+- name: "ssh : set ownership of SFTP user home directory"
+  ansible.builtin.file:
+    path: "{{ item.home }}"
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+  loop: "{{ __security_sftp_users.results }}"
+  when: __security_sftp_users is changed
+  become: yes
+  tags:
+    - security_sftp_config
+
+- name: "ssh : create SFTP user folders"
+  ansible.builtin.file:
+    path: "{{ item.0.home }}/{{ item.1.name }}"
+    owner: "{{ item.0.name }}"
+    group: "{{ item.1.group | default(item.0.group) }}"
+    mode: "{{ item.1.mode | default('0755') }}"
+    state: directory
+  with_subelements:
+    - "{{ __security_sftp_users.results }}"
+    - item.folders
+  when: __security_sftp_users is changed
+  become: yes
+  tags:
+    - security_sftp_config
+
+
 
 ##
 ## Validate SSH config
@@ -29,6 +100,7 @@
   become: yes
   notify: security restart sshd
   tags:
+    - security_sftp_config
     - security_ssh_config
 
 - name: "sshd : find any .shosts files"
