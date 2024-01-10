@@ -89,6 +89,13 @@ AllowUsers {{ _user.name }}@{{ _user.host }}
 AllowUsers {{ _user.name }}
 {% endif %}
 {% endfor %}
+{% for _user in security_sftp_users %}
+{% if _user.host is defined %}
+AllowUsers {{ _user.name }}@{{ _user.host }}
+{% else %}
+AllowUsers {{ _user.name }}
+{% endif %}
+{% endfor %}
 
 
 # Specific groups with access
