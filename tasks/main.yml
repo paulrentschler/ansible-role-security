@@ -9,6 +9,7 @@
 
 - name: "establish additional logging with auditd"
   include_tasks: auditd.yml
+  tags: always
 
 
 - name: "limit the use of local accounts"
@@ -16,8 +17,14 @@
   tags: always
 
 
+- name: "configure sshd"
+  include_tasks: sshd.yml
+  tags: always
+
+
 - name: "set network level protections"
   include_tasks: network.yml
+  tags: always
 
 
 # more IP spoofing prevention
@@ -39,6 +46,7 @@
 
 - name: "set password restrictions/standards/complexity"
   include_tasks: passwords.yml
+  tags: always
 
 
 - name: "add additional security options to the PAM configuration"

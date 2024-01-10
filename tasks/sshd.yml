@@ -1,0 +1,110 @@
+---
+# Configure SSHD
+
+##
+## Validate SSH config
+##
+
+- name: "sshd : install logon banners"
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/etc/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - issue
+    - issue.net
+  become: yes
+
+- name: "sshd : configure sshd"
+  ansible.builtin.template:
+    src: sshd_config.j2
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: 0644
+    validate: /usr/sbin/sshd -t -f %s
+    backup: yes
+  become: yes
+  notify: security restart sshd
+  tags:
+    - security_ssh_config
+
+- name: "sshd : find any .shosts files"
+  ansible.builtin.find:
+    paths: /
+    hidden: yes
+    patterns: ".shosts"
+    recurse: yes
+  register: __security_shosts_files
+  become: yes
+
+- name: "sshd : remove .shosts files"
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ __security_shosts_files.files|flatten(levels=1) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: __security_shosts_files.matched|int > 0
+  become: yes
+
+- name: "sshd : find any shosts.equiv files"
+  ansible.builtin.find:
+    paths: /
+    hidden: yes
+    patterns: "shosts.equiv"
+    recurse: yes
+  register: __security_shosts_equiv_files
+  become: yes
+
+- name: "sshd : Remove shosts.equiv files"
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ __security_shosts_equiv_files.files|flatten(levels=1) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: __security_shosts_equiv_files.matched | int > 0
+  become: yes
+
+
+##
+## Validate SSH key permissions
+##
+
+- name: "sshd : find SSH private keys"
+  ansible.builtin.find:
+    paths: /etc/ssh/
+    patterns: "*key"
+  register: __security_ssh_private_keys
+  become: yes
+
+- name: "sshd : set the private SSH key permissions"
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: 0600
+  loop: "{{ __security_ssh_private_keys.files|flatten(levels=1) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: __security_ssh_private_keys.matched|int > 0
+  become: yes
+
+- name: "sshd : find SSH public keys"
+  ansible.builtin.find:
+    paths: /etc/ssh/
+    patterns: "*.pub"
+  register: __security_ssh_public_keys
+  become: yes
+
+- name: "sshd : set the public SSH key permissions"
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: 0644
+  loop: "{{ __security_ssh_public_keys.files|flatten(levels=1) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: __security_ssh_public_keys.matched | int > 0
+  become: yes
+
