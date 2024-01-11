@@ -73,6 +73,24 @@
 
 
 ##
+## Allow SFTP access via the firewall
+##
+
+- name: "ssh : allow SFTP access from specific hosts"
+  community.general.ufw:
+    rule: allow
+    from_ip: "{{ item.host }}"
+    proto: tcp
+    to_port: "{{ firewall_ssh_port | default('22') }}"
+  loop: "{{ security_sftp_users }}"
+  become: yes
+  when: item.host is defined
+  tags:
+    - security_sftp_config
+
+
+
+##
 ## Validate SSH config
 ##
 
