@@ -24,6 +24,7 @@
 {% set duo = security_pam_use_duo %}
 {% set krb5 = security_pam_use_krb5 %}
 {% set ldap = security_pam_use_ldap %}
+{% set sss = security_pam_use_sss %}
 {% set caching = 'no' %}
 {# logic for calculating the "skips" can be found in #}
 {#   tests/test_pam_auth_skip_logic.py               #}
@@ -32,13 +33,14 @@
 {% set unix_skips = 0 %}
 {% set krb5_skips = 0 %}
 {% if security_pam_cache_credentials|bool %}
-  {% if krb5|bool or ldap|bool %}
+  {% if krb5|bool or ldap|bool or sss|bool %}
     {% set caching = 'yes' %}
     {% set caching_skips = 2 + (2 * duo|bool|int) %}
   {% endif %}
 {% endif %}
-{% set ldap_skips = 1 + (2 * caching|bool|int) %}
-{% set unix_skips = (1 + ldap|bool|int) + (2 * caching|bool|int) + (2 * duo|bool|int) - (2 * duo_local|bool|int * duo|bool|int) %}
+{% set sss_skips = 1 + (2 * caching|bool|int) %}
+{% set ldap_skips = 1 + (2 * caching|bool|int) + (1 * sss|bool|int) %}
+{% set unix_skips = (1 + ldap|bool|int) + (1 * sss|bool|int) + (2 * caching|bool|int) + (2 * duo|bool|int) - (2 * duo_local|bool|int * duo|bool|int) %}
 {% set krb5_skips = unix_skips + 1 + (-2 * duo|bool|int) + (2 * duo_local|bool|int) %}
 
 # here are the per-package modules (the "Primary" block)
@@ -65,6 +67,11 @@ auth       [success={{ unix_skips }} default=ignore]      pam_unix.so nullok_sec
 {% if ldap|bool %}
 # authenticate against LDAP, if none of the above methods succeeded
 auth       [success={{ ldap_skips }} default=ignore]      pam_ldap.so use_first_pass
+{% endif %}
+
+{% if sss|bool %}
+# authenticate against EAD with SSSD, if none of the above methods succeeded
+auth       [success={{ sss_skips }} default=ignore]       pam_sss.so use_first_pass
 {% endif %}
 
 

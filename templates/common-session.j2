@@ -18,6 +18,7 @@
 {% set min_uid = security_pam_minimum_uid %}
 {% set krb5 = security_pam_use_krb5 %}
 {% set ldap = security_pam_use_ldap %}
+{% set sss = security_pam_use_sss %}
 
 # here are the per-package modules (the "Primary" block)
 
@@ -48,11 +49,14 @@ session    optional                        pam_umask.so
 session    optional                        pam_krb5.so minimum_uid={{ min_uid }}
 {% endif %}
 session    required                        pam_unix.so
+{% if sss|bool %}
+session    optional                        pam_sss.so
+{% endif %}
 {% if ldap|bool %}
 session    optional                        pam_ldap.so
 {% endif %}
 session    optional                        pam_systemd.so
-{% if krb5|bool or ldap|bool %}
+{% if krb5|bool or ldap|bool or sss|bool %}
 # ensure the home directory is created for non-local users
 session    required                        pam_mkhomedir.so skel=/etc/skel umask=0022
 {% endif %}

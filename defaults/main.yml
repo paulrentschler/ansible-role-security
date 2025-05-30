@@ -97,6 +97,10 @@ security_pam_use_krb5: no
 # include configuration to lookup users/groups with LDAP
 security_pam_use_ldap: no
 
+# include configuration to use SSSD for authentication, authorization,
+# and user/group information
+security_pam_use_sss: no
+
 
 # include configuration to do second-factor authentication with Duo
 security_pam_use_duo: no
